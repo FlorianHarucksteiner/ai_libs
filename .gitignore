@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.python-version
+data/
+*.pth
+*.h5
+*.keras
