@@ -1,0 +1,10 @@
+framework,dataset,model,epochs,batch_size,optimizer,test_accuracy_pct
+PyTorch,MNIST,"FFN (1x128, ReLU)",5,64,Adam,97.6
+TensorFlow,MNIST,"FFN (1x128, ReLU)",5,32,Adam,97.7
+Keras,MNIST,"FFN (1x128, ReLU)",5,64,Adam,97.8
+PyTorch,Fashion-MNIST,"FFN (1x128, ReLU)",5,64,Adam,87.5
+TensorFlow,Fashion-MNIST,"FFN (1x128, ReLU)",5,32,Adam,87.2
+Keras,Fashion-MNIST,"FFN (1x128, ReLU)",5,64,Adam,87.6
+PyTorch,CIFAR-10,CNN (2 Conv),10,64,Adam,72.08
+TensorFlow,CIFAR-10,CNN (GradientTape),10,64,Adam,71.49
+Keras,CIFAR-10,CNN (Sequential),10,64,Adam,69.39
