@@ -87,6 +87,37 @@ Durch den Aufruf von `model.fit()` und `model.evaluate()` werden viele Low-Level
 
 # Keras
 
+Für dieses Experiment wird Keras mit TensorFlow als Backend verwendet. Das
+Modell ist identisch zur TensorFlow-Lösung aufgebaut (`Flatten` → `Dense(128, ReLU)`
+→ `Dense(10, Softmax)`), geladen über `keras.datasets.mnist`. Test-Accuracy: ~97.8 %.
+
+**1. Wie ähnlich ist der Keras-Code dem TensorFlow-Code?**
+Praktisch identisch. Da `tf.keras` selbst die Keras-API ist, unterscheiden sich
+die beiden Programme fast nur in den Importen (`import keras` statt
+`import tensorflow as tf`) und im Zugriff auf die Datasets (`keras.datasets`
+statt `tf.keras.datasets`). Modellaufbau, `compile`, `fit` und `evaluate` sind
+gleich.
+
+**2. Welche Teile sind besonders kompakt?**
+Der gesamte Ablauf besteht aus wenigen Zeilen: Das Modell wird als Liste von
+`Sequential`-Schichten definiert, mit einem einzigen `compile`-Aufruf
+konfiguriert und mit `fit` trainiert. Die komplette Trainingsschleife
+(Batching, Forward Pass, Backpropagation, Gewichts-Update) steckt in diesem
+einen `fit`-Aufruf.
+
+**3. Welche Vorteile hat Keras für schnelle Experimente?**
+Sehr wenig Boilerplate, gut lesbare und einheitliche API, sinnvolle
+Voreinstellungen und eingebaute Fortschrittsanzeige sowie Metriken. Man kann
+ein lauffähiges Modell in Minuten aufsetzen und Architekturen schnell variieren,
+ohne sich um Low-Level-Details kümmern zu müssen.
+
+**4. Welche Nachteile kann es haben, wenn sehr viele Details verborgen werden?**
+Man verliert den Blick auf das, was intern passiert: Forward Pass,
+Gradientenberechnung und Gewichts-Updates sind nicht sichtbar. Das erschwert
+das Verständnis, das gezielte Debuggen und das Eingreifen, sobald man vom
+Standardablauf abweichen möchte (z. B. eigene Trainingsschritte, ungewöhnliche
+Loss-Funktionen). Für das Lernen der Grundprinzipien ist die explizite
+PyTorch-Variante lehrreicher.
 
 ---
 
@@ -194,6 +225,95 @@ pip install torch torchvision tensorflow
 python cifar10_pytorch.py
 python cifar10_tensorflow.py
 python cifar10_keras.py
+```
+
+---
+
+# Teil 7: Vergleich der Libraries
+
+## Vergleichstabelle
+
+| Kriterium | PyTorch | TensorFlow | Keras |
+| :--- | :--- | :--- | :--- |
+| Einstieg | mittel | mittel | sehr einfach |
+| Lesbarkeit des Codes | gut (aber mehr Zeilen) | mittel | sehr gut |
+| Sichtbarkeit der Trainingsschleife | vollständig sichtbar | sichtbar (GradientTape) | verborgen (`fit`) |
+| Kontrolle über Details | sehr hoch | hoch | gering |
+| Geschwindigkeit beim Prototyping | mittel | mittel | sehr hoch |
+| Dokumentation | sehr gut | sehr gut | sehr gut |
+| Fehlermeldungen verständlich | meist gut (Python-Stacktraces) | teils unübersichtlich | meist gut |
+| Für Anfänger geeignet | bedingt | bedingt | ja |
+| Für größere Projekte geeignet | ja | ja | ja (auf TF-Basis) |
+
+## Beantwortung der Leitfragen
+
+**1. Mit welcher Library konnten Sie am schnellsten ein Modell trainieren?**
+Mit Keras – durch `Sequential`, `compile` und `fit` war das Modell mit den
+wenigsten Zeilen lauffähig.
+
+**2. Bei welcher Library haben Sie den Trainingsprozess am besten verstanden?**
+Bei PyTorch, weil Forward Pass, `loss.backward()` und `optimizer.step()`
+explizit in der Schleife stehen und jeder Schritt sichtbar ist.
+
+**3. Bei welcher Library war der Code am übersichtlichsten?**
+Bei Keras – die High-Level-API ist am kompaktesten und am leichtesten zu lesen.
+
+**4. Welche Library erinnert am stärksten an Ihre eigene NumPy-Implementierung?**
+PyTorch. Die manuelle Trainingsschleife mit Forward Pass, Loss-Berechnung,
+Backpropagation und Gewichts-Update entspricht strukturell genau dem, was wir
+zuvor in NumPy selbst programmiert haben – nur dass Autograd die Ableitungen
+übernimmt.
+
+**5. Welche Library würden Sie für ein eigenes kleines Projekt verwenden?**
+PyTorch, weil es eine gute Balance aus Kontrolle und Komfort bietet und das
+Debuggen mit normalen Python-Stacktraces einfach ist.
+
+**6. Welche Library würden Sie für schnelles Experimentieren verwenden?**
+Keras, weil sich Architekturen mit minimalem Aufwand schnell ausprobieren und
+vergleichen lassen.
+
+---
+
+# Teil 8: Visualisierung
+
+Als Framework für die Visualisierungen wurde **PyTorch** gewählt, die
+Auswertungen beziehen sich auf **Fashion-MNIST** (Beispielbilder zusätzlich für
+MNIST und CIFAR-10). Die Grafiken werden von den Skripten `gen_visuals.py`
+bzw. `deep_learning_libraries/results/generate_results.py` erzeugt.
+
+## Umgesetzte Visualisierungen (Mindestanforderungen)
+
+| Anforderung | Umsetzung | Datei |
+| :--- | :--- | :--- |
+| ≥ 10 Beispielbilder pro Dataset | je 10 beschriftete Beispiele für MNIST, Fashion-MNIST und CIFAR-10 | `assets/samples_mnist.png`, `assets/samples_fashion.png`, `assets/samples_cifar.png` |
+| ≥ 1 Loss-Kurve | Trainings- und Test-Loss je Epoche (Fashion-MNIST) | `results/loss_curves.png` |
+| ≥ 1 Accuracy-Kurve | Test-Accuracy je Epoche (Fashion-MNIST) | `results/accuracy_curves.png` |
+| ≥ 5 falsch klassifizierte Beispiele | 10 Fehlklassifikationen mit „Wahr"/„Vorhersage" | `assets/misclassified.png` |
+| Confusion Matrix (erweitert) | 10×10-Matrix über das Fashion-MNIST-Testset | `results/confusion_matrix.png` |
+
+## Beobachtungen
+
+- **Beispielbilder:** MNIST-Ziffern sind klar und kontrastreich, Fashion-MNIST
+  zeigt deutlich variablere Graustufen-Texturen, CIFAR-10 enthält echte
+  Farbfotos mit Hintergrund – die steigende Schwierigkeit ist direkt sichtbar.
+- **Loss-Kurve:** Der Trainings-Loss fällt über die Epochen kontinuierlich; der
+  Test-Loss flacht früher ab und beginnt leicht zu stagnieren – ein erstes
+  Anzeichen für beginnendes Overfitting bei einem reinen Feed-Forward-Netz.
+- **Accuracy-Kurve:** Die Test-Accuracy steigt rasch in den ersten Epochen und
+  pendelt sich danach bei etwa 88–89 % ein.
+- **Fehlklassifikationen / Confusion Matrix:** Die meisten Fehler treten
+  zwischen den optisch ähnlichen Oberteilen auf – vor allem
+  T-Shirt/Top ↔ Hemd ↔ Pullover ↔ Mantel. Schuhe und Taschen werden dagegen
+  zuverlässig erkannt. Das bestätigt die Beobachtung aus Teil 5.
+
+## Reproduktion
+
+```bash
+# Beispielbilder, Loss-/Accuracy-Kurve, Fehlklassifikationen
+python gen_visuals.py
+
+# Loss-/Accuracy-Kurve, Confusion Matrix, Ergebnis-Tabelle (results/)
+python deep_learning_libraries/results/generate_results.py
 ```
 
 
